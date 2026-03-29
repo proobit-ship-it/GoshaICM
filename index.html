@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Институт цветных металлов</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html {
+            width: 100%; height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white; overflow-x: hidden;
+        }
+
+        /* === ЭКРАН МЕНЮ === */
+        #menuScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 20px; z-index: 100;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+        }
+        .logo {
+            font-size: 2rem; font-weight: bold; margin-bottom: 10px; text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .subtitle {
+            font-size: 1.1rem; opacity: 0.9; margin-bottom: 40px; text-align: center;
+        }
+        .btn {
+            width: 100%; max-width: 400px; padding: 18px 24px; margin: 12px 0;
+            background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 16px; color: white; font-size: 1.1rem; font-weight: 500;
+            cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);
+        }
+        .btn:hover {
+            background: rgba(255,255,255,0.3); transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .btn:active { transform: translateY(-1px); }
+
+        /* === ЭКРАН ВИДЕО === */
+        #videoScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; display: none; flex-direction: column; z-index: 200;
+        }
+        .video-header {
+            padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
+        }
+        .video-title { font-size: 1.2rem; font-weight: 600; }
+        .back-btn {
+            padding: 10px 20px; background: #e94560; border: none; border-radius: 10px;
+            color: white; font-weight: 600; cursor: pointer; transition: background 0.3s;
+        }
+        .back-btn:hover { background: #ff6b6b; }
+        .video-container {
+            flex: 1; display: flex; align-items: center; justify-content: center;
+            padding: 10px;
+        }
+        video {
+            width: 100%; max-width: 1200px; max-height: 85vh;
+            border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            object-fit: contain; background: black;
+        }
+
+        /* === АДАПТИВ === */
+        @media (max-width: 600px) {
+            .logo { font-size: 1.5rem; }
+            .subtitle { font-size: 1rem; }
+            .btn { padding: 15px 20px; font-size: 1rem; }
+            .video-title { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- === МЕНЮ === -->
+    <div id="menuScreen">
+        <div class="logo">⛏️ Институт цветных металлов</div>
+        <div class="subtitle">Выберите раздел</div>
+        
+        <button class="btn" onclick="playVideo('greeting')">👋 Приветствие</button>
+        <button class="btn" onclick="playVideo('applicant')">🎓 Абитуриенту</button>
+        <button class="btn" onclick="playVideo('event')">📅 Актуальное событие</button>
+        <button class="btn" onclick="playVideo('history')">📜 История института</button>
+    </div>
+
+    <!-- === ВИДЕО === -->
+    <div id="videoScreen">
+        <div class="video-header">
+            <div class="video-title" id="videoTitle">Название видео</div>
+            <button class="back-btn" onclick="closeVideo()">← Назад</button>
+        </div>
+        <div class="video-container">
+            <video id="mainVideo" controls playsinline preload="metadata">
+                <source src="" type="video/mp4">
+                Ваш браузер не поддерживает видео.
+            </video>
+        </div>
+    </div>
+
+    <script>
+        // Настройки видео
+        const videos = {
+            greeting: { 
+                src: 'videos/gosha.mp4',
+                title: '👋 Приветствие' 
+            },
+            applicant: { 
+                src: 'videos/applicant.mp4', 
+                title: '🎓 Абитуриенту' 
+            },
+            event: { 
+                src: 'videos/event.mp4', 
+                title: '📅 Актуальное событие' 
+            },
+            history: { 
+                src: 'videos/history.mp4', 
+                title: '📜 История института' 
+            }
+        };
+
+        const menuScreen = document.getElementById('menuScreen');
+        const videoScreen = document.getElementById('videoScreen');
+        const mainVideo = document.getElementById('mainVideo');
+        const videoTitle = document.getElementById('videoTitle');
+        const videoSource = mainVideo.querySelector('source');
+
+        function playVideo(key) {
+            const video = videos[key];
+            if (!video) return;
+
+            // 🔧 ИСПРАВЛЕНИЕ: Полностью сбрасываем и перезагружаем видео
+            mainVideo.pause();
+            mainVideo.src = '';           // Очищаем источник
+            mainVideo.load();             // Принудительно загружаем
+            
+            // Небольшая задержка для надёжности
+            setTimeout(() => {
+                videoSource.src = video.src;
+                videoTitle.textContent = video.title;
+                
+                mainVideo.load();         // Загружаем новое видео
+                
+                // Показываем экран и запускаем
+                menuScreen.style.display = 'none';
+                videoScreen.style.display = 'flex';
+                
+                mainVideo.play().catch(e => {
+                    console.log('Ошибка воспроизведения:', e);
+                    // Если автозапуск не сработал — пользователь нажмёт Play сам
+                });
+            }, 100);
+        }
+
+        function closeVideo() {
+            // 🔧 ИСПРАВЛЕНИЕ: Полная очистка видео
+            mainVideo.pause();
+            mainVideo.src = '';
+            mainVideo.load();
+            
+            videoScreen.style.display = 'none';
+            menuScreen.style.display = 'flex';
+        }
+
+        // Закрытие по клавише Esc
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && videoScreen.style.display === 'flex') {
+                closeVideo();
+            }
+        });
+
+        // Обработка ошибок загрузки видео
+        mainVideo.addEventListener('error', (e) => {
+            console.log('Ошибка загрузки видео:', e);
+            alert('Видео не загрузилось. Проверьте, что файл загружен в папку videos/');
+        });
+    </script>
+</body>
+</html>
